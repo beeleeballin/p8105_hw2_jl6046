@@ -16,6 +16,7 @@ library(dplyr)
 ```
 
 ## Problem 1:
+Import and clean sheet "Mr. Trash Wheel"
 
 ```{r}
 tw_df = 
@@ -26,8 +27,29 @@ tw_df =
     sports_balls = round(sports_balls))
 ```
 
+Import, clean and combine sheets "2019 Precipitation" and "2019 Precipitation"
+
 ```{r}
-prcp_2018_df = read_excel("./hw2_files/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5)
-prcp_2019_df = read_excel("./hw2_files/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "2019 Precipitation")
+prcp_2018_df = 
+  read_excel("./hw2_files/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "2018 Precipitation", range = "A2:B14") %>%
+  janitor::clean_names() %>%
+  mutate(
+    year = 2018
+  )
+
+prcp_2019_df = 
+  read_excel("./hw2_files/Trash-Wheel-Collection-Totals-8-6-19.xlsx", range = "2019 Precipitation!A2:B14") %>%
+  janitor::clean_names() %>%
+  drop_na(total) %>%
+  mutate(
+    year = 2019
+  )
+
+prcp_df =
+  bind_rows(prcp_2018_df, prcp_2019_df) %>%
+  mutate(
+    month = month.name[month]
+  )
+
 ```
 
