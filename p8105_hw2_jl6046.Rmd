@@ -25,7 +25,7 @@ trashwheel_excel_path = "./hw2_files/Trash-Wheel-Collection-Totals-7-2020-2.xlsx
 
 Import and clean sheet "Mr. Trash Wheel" from the excel spreadsheet.
 
-```{r}
+```{r, message = FALSE}
 tw_df = 
   read_excel(trashwheel_excel_path, sheet = 1) %>%
   janitor::clean_names() %>%
@@ -74,5 +74,36 @@ aggregate(sports_balls ~ year, tw_df, median)
 ```
 
 
+## Problem 2
+
+Set FiveThirtyEight csv file paths
+
+```{r}
+pols_month_538_csv_path = "./hw2_files/pols-month.csv"
+unemployment_538_csv_path = "./hw2_files/unemployment.csv"
+snp_538_csv_path = "./hw2_files/snp.csv"
+```
+
+```{r}
+pols_df = 
+  read_csv(pols_month_538_csv_path) %>% 
+  separate(col = mon, into = c('year', 'month', 'day'), sep = '-') %>% 
+  mutate(
+    month = month.name[as.numeric(month)]
+  ) %>% 
+  pivot_longer(
+    c(prez_gop, prez_dem),
+    names_to = "president",
+    names_prefix = "prez_",
+    values_to = "president_TF"
+  ) %>% 
+  subset(president_TF == 1) %>% 
+  select(- c(president_TF, day))
+```
+
+```{r}
+snp_df = 
+  read_csv(snp_538_csv_path)
+```
 
 
