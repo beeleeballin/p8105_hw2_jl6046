@@ -16,29 +16,36 @@ library(dplyr)
 ```
 
 ## Problem 1:
-Import and clean sheet "Mr. Trash Wheel"
+
+Set Mr. Trash Wheel excel file path
+
+```{r}
+trashwheel_excel_path = "./hw2_files/Trash-Wheel-Collection-Totals-7-2020-2.xlsx"
+```
+
+Import and clean sheet "Mr. Trash Wheel" from the excel spreadsheet.
 
 ```{r}
 tw_df = 
-  read_excel("./hw2_files/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 1) %>%
+  read_excel(trashwheel_excel_path, sheet = 1) %>%
   janitor::clean_names() %>%
   drop_na(dumpster) %>%
   mutate(
     sports_balls = round(sports_balls))
 ```
 
-Import, clean and combine sheets "2019 Precipitation" and "2019 Precipitation"
+Import, clean and combine sheets "2019 Precipitation" and "2019 Precipitation."
 
 ```{r}
 prcp_2018_df = 
-  read_excel("./hw2_files/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "2018 Precipitation", range = "A2:B14") %>%
+  read_excel(trashwheel_excel_path, sheet = "2018 Precipitation", range = "A2:B14") %>%
   janitor::clean_names() %>%
   mutate(
     year = 2018
   )
 
 prcp_2019_df = 
-  read_excel("./hw2_files/Trash-Wheel-Collection-Totals-8-6-19.xlsx", range = "2019 Precipitation!A2:B14") %>%
+  read_excel(trashwheel_excel_path, range = "2019 Precipitation!A2:B14") %>%
   janitor::clean_names() %>%
   drop_na(total) %>%
   mutate(
@@ -50,6 +57,22 @@ prcp_df =
   mutate(
     month = month.name[month]
   )
-
 ```
+
+There are 17 variables and 454 observations in the Mr. Trash Wheel data frame, including information on dumpster IDs, date, and the types and weight of collected trash. On the other hand, the combined precipitation data formed a 3 variable 24 observation data frame, where the date and monthly precipitation were recorded. 
+
+The cells of annual precipitation were omitted when we read in the spread sheets, but we may calculate it with the data we have. The total precipitation in 2018 is 70.33.
+
+```{r}
+aggregate(total ~ year, prcp_df, sum)
+```
+
+Using the same method, we can acquire the median number of sports balls from a dumpster is 9 in 2019. 
+
+```{r}
+aggregate(sports_balls ~ year, tw_df, median)
+```
+
+
+
 
