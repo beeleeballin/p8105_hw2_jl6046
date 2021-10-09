@@ -19,14 +19,14 @@ library(dplyr)
 Set Mr. Trash Wheel excel file path
 
 ```{r}
-trashwheel_excel_path = "./hw2_files/Trash-Wheel-Collection-Totals-7-2020-2.xlsx"
+trashwheel_path = "./hw2_files/Trash-Wheel-Collection-Totals-7-2020-2.xlsx"
 ```
 
 Import and clean sheet "Mr. Trash Wheel" from the excel spreadsheet.
 
 ```{r, message = FALSE}
 tw_df = 
-  read_excel(trashwheel_excel_path, sheet = 1) %>%
+  read_excel(trashwheel_path, sheet = 1) %>%
   janitor::clean_names() %>%
   drop_na(dumpster) %>%
   mutate(
@@ -37,14 +37,14 @@ Import, clean and combine sheets "2019 Precipitation" and "2019 Precipitation."
 
 ```{r}
 prcp_2018_df = 
-  read_excel(trashwheel_excel_path, sheet = "2018 Precipitation", range = "A2:B14") %>%
+  read_excel(trashwheel_path, sheet = "2018 Precipitation", range = "A2:B14") %>%
   janitor::clean_names() %>%
   mutate(
     year = 2018
   )
 
 prcp_2019_df = 
-  read_excel(trashwheel_excel_path, range = "2019 Precipitation!A2:B14") %>%
+  read_excel(trashwheel_path, range = "2019 Precipitation!A2:B14") %>%
   janitor::clean_names() %>%
   drop_na(total) %>%
   mutate(
@@ -78,14 +78,14 @@ aggregate(sports_balls ~ year, tw_df, median)
 Set FiveThirtyEight csv file paths
 
 ```{r}
-pols_month_538_csv_path = "./hw2_files/pols-month.csv"
-unemployment_538_csv_path = "./hw2_files/unemployment.csv"
-snp_538_csv_path = "./hw2_files/snp.csv"
+pols_month_538_path = "./hw2_files/pols-month.csv"
+unemployment_538_path = "./hw2_files/unemployment.csv"
+snp_538_path = "./hw2_files/snp.csv"
 ```
 
 ```{r, message = FALSE}
 pols_df = 
-  read_csv(pols_month_538_csv_path) %>% 
+  read_csv(pols_month_538_path) %>% 
   separate(col = mon, into = c('year', 'month', 'day'), sep = '-') %>% 
   mutate(
     month = month.name[as.numeric(month)],
@@ -105,7 +105,7 @@ pols_df =
 
 ```{r, message = FALSE}
 snp_df = 
-  read_csv(snp_538_csv_path) %>% 
+  read_csv(snp_538_path) %>% 
   separate(col = date, into = c("month", "day", "year"), sep = "/") %>% 
   mutate(
     year = case_when(as.numeric(year) <= 15 ~ as.numeric(year) + 2000,
@@ -121,7 +121,7 @@ snp_df =
 
 ```{r}
 unemp_df = 
-  read_csv(unemployment_538_csv_path) %>%
+  read_csv(unemployment_538_path) %>%
   janitor::clean_names() %>% 
   pivot_longer(
     c(-year),
@@ -146,12 +146,31 @@ unemp_df =
     month = replace(month, month == month.abb[12], month.name[12]),
     month = as.factor(month),
     month = ordered(month, levels = month.name)
-  )
+  ) %>% 
+  arrange(year, month)
 ```
 
 ```{r}
 fivethirtyeight_df =
   full_join(pols_df, snp_df, by = c("year", "month")) %>%
-  full_join(., unemp_df, by = c("year", "month"))
+  full_join(., unemp_df, by = c("year", "month")) %>% 
+  arrange(year, month)
+```
+
+## Problem 3
+
+```{r}
+baby_name_path = "./hw2_files/Popular_Baby_Names.csv"
+```
+
+```{r}
+bn_df = 
+  read_csv(baby_name_path) %>% 
+  janitor::clean_names() %>% 
+  select(gender, ethnicity, year_of_birth, count, rank, childs_first_name) %>% 
+  pivot_wider(
+    names_from = year_of_birth,
+    values_from = rank
+  )
 ```
 
