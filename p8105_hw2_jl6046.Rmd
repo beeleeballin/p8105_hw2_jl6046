@@ -22,7 +22,7 @@ Set Mr. Trash Wheel excel file path
 trashwheel_path = "./hw2_files/Trash-Wheel-Collection-Totals-7-2020-2.xlsx"
 ```
 
-Import and clean sheet "Mr. Trash Wheel" from the excel spreadsheet.
+Import and clean sheet "Mr. Trash Wheel" from the spreadsheet
 
 ```{r, message = FALSE}
 tw_df = 
@@ -30,7 +30,8 @@ tw_df =
   janitor::clean_names() %>%
   drop_na(dumpster) %>%
   mutate(
-    sports_balls = round(sports_balls))
+    sports_balls = round(sports_balls)
+  )
 ```
 
 Import, clean and combine sheets "2019 Precipitation" and "2019 Precipitation."
@@ -58,7 +59,7 @@ prcp_df =
   )
 ```
 
-There are 17 variables and 454 observations in the Mr. Trash Wheel data frame, including information on dumpster IDs, date, and the types and weight of collected trash. On the other hand, the combined precipitation data formed a 3 variable 24 observation data frame, where the date and monthly precipitation were recorded. 
+There are 17 variables and 454 observations in the Mr. Trash Wheel data frame, including information on dumpster IDs, dates, and the types and weights of collected trash. On the other hand, the 2018 and 2019 precipitation data formed a 3 variable X 24 observation data frame, where the dates and monthly precipitation were recorded. 
 
 The cells of annual precipitation were omitted when we read in the spread sheets, but we may calculate it with the data we have. The total precipitation in 2018 is 70.33.
 
@@ -66,7 +67,7 @@ The cells of annual precipitation were omitted when we read in the spread sheets
 aggregate(total ~ year, prcp_df, sum)
 ```
 
-Using the same method, we can acquire the median number of sports balls from a dumpster is 9 in 2019. 
+Using the same method, we can acquire 9 as the median number of sports balls from a dumpster in 2019. 
 
 ```{r}
 aggregate(sports_balls ~ year, tw_df, median)
@@ -75,7 +76,7 @@ aggregate(sports_balls ~ year, tw_df, median)
 
 ## Problem 2
 
-Set FiveThirtyEight csv file paths
+Set FiveThirtyEight comma-separated values file paths
 
 ```{r}
 pols_month_538_path = "./hw2_files/pols-month.csv"
@@ -99,8 +100,7 @@ pols_df =
     values_to = "president_TF"
   ) %>% 
   subset(president_TF == 1) %>% 
-  select(- c(president_TF, day)) %>% 
-  arrange(year, month)
+  select(- c(president_TF, day))
 ```
 
 ```{r, message = FALSE}
@@ -115,11 +115,10 @@ snp_df =
     month = as.factor(month),
     month = ordered(month, levels = month.name)
   ) %>% 
-  select(year, month, everything()) %>% 
-  arrange(year, month)
+  select(year, month, everything())
 ```
 
-```{r}
+```{r, message = FALSE}
 unemp_df = 
   read_csv(unemployment_538_path) %>%
   janitor::clean_names() %>% 
@@ -146,8 +145,7 @@ unemp_df =
     month = replace(month, month == month.abb[12], month.name[12]),
     month = as.factor(month),
     month = ordered(month, levels = month.name)
-  ) %>% 
-  arrange(year, month)
+  )
 ```
 
 ```{r}
@@ -157,13 +155,19 @@ fivethirtyeight_df =
   arrange(year, month)
 ```
 
+The three files recorded the state government and congress positions held by the bipartisan government, S&P stock prices, and unemployment rates from 1947 to 2015, forming a 12 variable X 823 observation data frame as a result. The information could be helpful in correlating the ruling party and the domestic economy upon further analysis.
+
+```{r}
+tail(fivethirtyeight_df, n = 5L)
+```
+
 ## Problem 3
 
 ```{r}
 baby_name_path = "./hw2_files/Popular_Baby_Names.csv"
 ```
 
-```{r}
+```{r, message = FALSE}
 bn_df = 
   read_csv(baby_name_path) %>% 
   janitor::clean_names() %>% 
