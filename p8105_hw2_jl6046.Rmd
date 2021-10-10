@@ -14,7 +14,7 @@ library(tidyr)
 library(dplyr)
 ```
 
-## Problem 1:
+## Problem 1
 
 Set Mr. Trash Wheel excel file path
 
@@ -83,6 +83,8 @@ pols_month_538_path = "./hw2_files/pols-month.csv"
 unemployment_538_path = "./hw2_files/unemployment.csv"
 snp_538_path = "./hw2_files/snp.csv"
 ```
+
+Import and clean the 3 files separately as sub data frames before merging
 
 ```{r, message = FALSE}
 pols_df = 
@@ -155,7 +157,7 @@ fivethirtyeight_df =
   arrange(year, month)
 ```
 
-The three files recorded the state government and congress positions held by the bipartisan government, S&P stock prices, and unemployment rates from 1947 to 2015, forming a 12 variable X 823 observation data frame as a result. The information could be helpful in correlating the ruling party and the domestic economy upon further analysis.
+The three files recorded the state government and congress positions held by the bipartisan government, S&P stock prices, and unemployment rates from 1947 to 2015, forming a 12 variable X 823 observation data frame as a result. The information could be helpful in studying the relation between the ruling parties and the domestic economy upon further analysis.
 
 ```{r}
 tail(fivethirtyeight_df, n = 5L)
@@ -163,9 +165,13 @@ tail(fivethirtyeight_df, n = 5L)
 
 ## Problem 3
 
+Set Baby Names comma-separated values file path
+
 ```{r}
 baby_name_path = "./hw2_files/Popular_Baby_Names.csv"
 ```
+
+Import and clean the GIGANTIC file
 
 ```{r, message = FALSE}
 bn_df = 
@@ -176,12 +182,10 @@ bn_df =
     ethnicity = replace(ethnicity, ethnicity == "ASIAN AND PACI", "ASIAN AND PACIFIC ISLANDER"),
     ethnicity = replace(ethnicity, ethnicity == "BLACK NON HISP", "BLACK NON HISPANIC"),
     ethnicity = replace(ethnicity, ethnicity == "WHITE NON HISP", "WHITE NON HISPANIC"),
-    ethnicity = as.factor(ethnicity)
-  ) %>% 
-  mutate(
+    ethnicity = as.factor(ethnicity),
     childs_first_name = toupper(childs_first_name)
   ) %>% 
-  arrange(gender, ethnicity, childs_first_name) %>% 
+  arrange(childs_first_name, gender, ethnicity) %>% 
   unite(count_rank, c(count, rank)) %>% 
   distinct() %>% 
   mutate(
@@ -192,17 +196,101 @@ bn_df =
     values_from = count_rank
   ) %>% 
   select(-row) %>% 
-  group_by(gender, ethnicity, childs_first_name) %>% 
+  group_by(childs_first_name, gender, ethnicity) %>% 
   fill(everything(), .direction = "up") %>% 
-  distinct(gender, ethnicity, childs_first_name, .keep_all = TRUE) %>% 
+  # upgroup() %>% 
+  distinct(childs_first_name, gender, ethnicity, .keep_all = TRUE) %>% 
   separate(col = "2016", into = c("2016_count", "2016_rank"), sep = "_") %>% 
   separate(col = "2015", into = c("2015_count", "2015_rank"), sep = "_") %>% 
   separate(col = "2014", into = c("2014_count", "2014_rank"), sep = "_") %>% 
   separate(col = "2013", into = c("2013_count", "2013_rank"), sep = "_") %>% 
   separate(col = "2012", into = c("2012_count", "2012_rank"), sep = "_") %>% 
   separate(col = "2011", into = c("2011_count", "2011_rank"), sep = "_") %>% 
-  select(gender, ethnicity, childs_first_name, "2016_rank", "2016_count", "2015_rank", "2015_count", "2014_rank", "2014_count", "2013_rank", "2013_count", "2012_rank", "2012_count", "2011_rank", "2011_count")
+  mutate_at("2016_count", as.character) %>% 
+  mutate_at("2016_count", as.numeric) %>% 
+  mutate_at("2015_count", as.character) %>% 
+  mutate_at("2015_count", as.numeric) %>% 
+  mutate_at("2014_count", as.character) %>% 
+  mutate_at("2014_count", as.numeric) %>% 
+  mutate_at("2013_count", as.character) %>% 
+  mutate_at("2013_count", as.numeric) %>% 
+  mutate_at("2012_count", as.character) %>% 
+  mutate_at("2012_count", as.numeric) %>% 
+  mutate_at("2011_count", as.character) %>% 
+  mutate_at("2011_count", as.numeric) %>% 
+  mutate_at("2016_rank", as.character) %>% 
+  mutate_at("2016_rank", as.numeric) %>% 
+  mutate_at("2015_rank", as.character) %>% 
+  mutate_at("2015_rank", as.numeric) %>% 
+  mutate_at("2014_rank", as.character) %>% 
+  mutate_at("2014_rank", as.numeric) %>% 
+  mutate_at("2013_rank", as.character) %>% 
+  mutate_at("2013_rank", as.numeric) %>% 
+  mutate_at("2012_rank", as.character) %>% 
+  mutate_at("2012_rank", as.numeric) %>% 
+  mutate_at("2011_rank", as.character) %>% 
+  mutate_at("2011_rank", as.numeric) %>% 
+  select(childs_first_name, gender, ethnicity, "2016_rank", "2016_count", "2015_rank", "2015_count", "2014_rank", "2014_count", "2013_rank", "2013_count", "2012_rank", "2012_count", "2011_rank", "2011_count")
+```
 
+I'm not sure why ungroup() here doesn't work for me -- The console would throw an "upgroup() could not be found" error every time. I had hoped to separate columns "childs_first_name", "gender", and "ethnicity" after pivoting the data frame, but had no luck getting it to work even after I had searched through the web for answers. 
+
+For years, "Olivia" was an extremely, if not the most, popular name among Asian and Pacific Islanders as well as Non-Hispanic Whites. The name was also common among Non-Hispanic Blacks and Hispanics. Inspect the table for its popularity rankings from 2011 to 2016.
+
+```{r}
+oliva_df = bn_df %>% 
+  filter(
+    childs_first_name == "OLIVIA"
+  ) %>% 
+  select(-c("2016_count", "2015_count", "2014_count", "2013_count", "2012_count", "2011_count"))
+
+head(oliva_df)
+```
+
+My approach for this question would be to compare the mean rankings among male names, irregardless to their ethnicity stratification or year, and assume the most popular names be those with the highest unweighted ranking. However, I ran into trouble calculating their means. My numeric observations, assuming they inherited their variables' numeric qualities, could not be treated as inputs for mean() as expected. Please advise if possible. 
+
+```{r, warning = FALSE}
+mn_df = bn_df %>% 
+  filter(
+    gender == "MALE"
+  ) %>% 
+  select(-c("2016_count", "2015_count", "2014_count", "2013_count", "2012_count", "2011_count")) %>% 
+  rowwise() %>% 
+  mutate(
+    mean_rank = mean("2016_rank", "2015_rank", "2014_rank", "2013_rank", "2012_rank", "2011_rank")
+  )
+```
+
+I ran into a similar issue here, where if I use the 'numeric' data directly from the data frame the ggplot somehow treats it as a non-quantitative variable, scattering it on a straight flat line. I needed to create a separate data frame with new variables just to store them for the scatter plot to work as intended. 
+
+```{r, message = FALSE}
+mw2016_df = bn_df %>% 
+  filter(
+    gender == "MALE",
+    ethnicity == "WHITE NON HISPANIC"
+  ) %>% 
+  select("2016_rank", "2016_count") %>% 
+  drop_na("2016_rank")
+
+Rank = pull(mw2016_df, "2016_rank")
+Count = pull(mw2016_df, "2016_count")
+scatter_df = data.frame(Rank, Count)
+
+scatter_plot = 
+  ggplot(scatter_df, aes(x = Rank, y = Count)) +
+  geom_point() + 
+  labs(title = "Correlation between Popularity Rank and Count among White Non-Hispanic Male Names in 2016") +
+  theme(plot.title = element_text(size=9))
+
+scatter_plot
+```
+
+```{r, message = FALSE}
+ggsave("Rank_v_Count", 
+       plot = last_plot(),
+       device = "pdf",
+       path = "hw2_files"
+       )
 ```
 
 
